@@ -1,0 +1,40 @@
+services:
+  mongo:
+    image: mongo
+    container_name: mongo_container # any name ...
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db # any name (mongo_data)...
+    # networks:
+    #   - mynet
+    # restart: always
+
+  server: 
+    build: ./server
+    container_name: server_container # any name ...
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/DB # assign server to MongoDB
+
+  client:
+    build: ./client
+    container_name: client_container # any name ...
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+volumes:
+  mongo_data:
